@@ -52,6 +52,7 @@ class JOptSimpleCommandLineOptionsParserTests {
 			() -> assertFalse(options.isHideDetails()),
 			() -> assertFalse(options.isScanClasspath()),
 			() -> assertEquals(singletonList(STANDARD_INCLUDE_PATTERN), options.getIncludedClassNamePatterns()),
+			() -> assertEquals(emptyList(), options.getExcludedClassNamePatterns()),
 			() -> assertEquals(emptyList(), options.getIncludedPackages()),
 			() -> assertEquals(emptyList(), options.getExcludedPackages()),
 			() -> assertEquals(emptyList(), options.getIncludedTags()),
@@ -90,6 +91,17 @@ class JOptSimpleCommandLineOptionsParserTests {
 	}
 
 	@Test
+	public void parseValidExcludeClassNamePatterns() {
+		// @formatter:off
+		assertAll(
+			() -> assertEquals(singletonList(".*Test"), parseArgLine("-N .*Test").getExcludedClassNamePatterns()),
+			() -> assertEquals(asList(".*Test", ".*Tests"), parseArgLine("--exclude-classname .*Test --exclude-classname .*Tests").getExcludedClassNamePatterns()),
+			() -> assertEquals(singletonList(".*Test"), parseArgLine("--exclude-classname=.*Test").getExcludedClassNamePatterns())
+		);
+		// @formatter:on
+	}
+
+	@Test
 	public void usesDefaultClassNamePatternWithoutExplicitArgument() {
 		assertEquals(singletonList(STANDARD_INCLUDE_PATTERN), parseArgLine("").getIncludedClassNamePatterns());
 	}
@@ -97,6 +109,11 @@ class JOptSimpleCommandLineOptionsParserTests {
 	@Test
 	public void parseInvalidIncludeClassNamePatterns() throws Exception {
 		assertOptionWithMissingRequiredArgumentThrowsException("-n", "--include-classname");
+	}
+
+	@Test
+	public void parseInvalidExcludeClassNamePatterns() throws Exception {
+		assertOptionWithMissingRequiredArgumentThrowsException("-N", "--exclude-classname");
 	}
 
 	@Test
